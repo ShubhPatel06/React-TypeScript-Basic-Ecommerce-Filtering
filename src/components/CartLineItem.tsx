@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactElement } from "react";
+import { ChangeEvent, ReactElement, memo } from "react";
 import { CartItemType } from "../context/CartProvider";
 import { ReducerAction } from "../context/CartProvider";
 import { ReducerActionType } from "../context/CartProvider";
@@ -52,11 +52,52 @@ const CartLineItem = ({ item, dispatch, REDUCER_ACTIONS }: PropsType) => {
       <label htmlFor="itemQty" className="offscreen">
         Item Quantity
       </label>
-      <select name="itemQty" id="itemQty" className="cart__select"></select>
+      <select
+        name="itemQty"
+        id="itemQty"
+        className="cart__select"
+        value={item.qty}
+        aria-label="Item quantity"
+        onChange={onChangeQuantity}
+      >
+        {option}
+      </select>
+      <div className="cart__item-subtotal" aria-label="Line item Subtotal">
+        {new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(lineTotal)}
+      </div>
+
+      <button
+        className="cart__button"
+        aria-label="Remove Item From Cart"
+        title="Remove Item From Cart"
+        onClick={onRemoveFromCart}
+      >
+        ❌
+      </button>
     </li>
   );
 
-  return <div>CartLineItem</div>;
+  return content;
 };
 
-export default CartLineItem;
+function areItemsEqual(
+  { item: prevItem }: PropsType,
+  { item: nextItem }: PropsType
+) {
+  return Object.keys(prevItem).every((key) => {
+    return (
+      prevItem[key as keyof CartItemType] ===
+      nextItem[key as keyof CartItemType]
+    );
+  });
+}
+
+const MemoizedCartLineItem = memo<typeof CartLineItem>(
+  CartLineItem,
+  areItemsEqual
+);
+
+export default MemoizedCartLineItem;
